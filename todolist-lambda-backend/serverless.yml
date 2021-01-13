@@ -13,6 +13,10 @@ frameworkVersion: '2'
 provider:
   name: aws
   runtime: nodejs12.x
+  timeout: 30
+  memorySize: 128
+  logRetentionInDays: 30
+
   apiGateway:
     shouldStartNameWithService: true
 
@@ -25,15 +29,18 @@ provider:
         - dynamodb:GetItem
         - dynamodb:PutItem
         - dynamodb:DeleteItem
-      Resource: 'arn:aws:dynamodb:us-east-1:<AWS_ACCOUNT_ID>:table/to-do-list-item'
+      Resource:
+        Fn::Join:
+          - ':'
+          -
+            - 'arn:aws:dynamodb'
+            - Ref: 'AWS::Region'
+            - Ref: 'AWS::AccountId'
+            - 'table/to-do-list-item'
 
 plugins:
   - serverless-offline
-
-custom:
-  dynamodb:
-    stages:
-      - dev
+  - serverless-api-gateway-throttling
 
 resources:
   # DynamoDB
@@ -41,86 +48,77 @@ resources:
 
 functions:
   createTodo:
+    name: createTodoListItem
     handler: handler.createItem
-    layers:
-      # Please fill in as provided by the deployment wizard
-    environment:
-      # Please fill in as provided by the deployment wizard
+    layers: ${self:custom.layers}
+    environment: ${self:custom.environment}
     events:
       - http:
           method: post
           path: todolist
-          cors:
-            origin: '*' # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - Content-Type
-              - x-dtc
-            allowCredentials: true
+          cors: ${self:custom.cors}
 
   updateTodo:
+    name: updateTodoListItem
     handler: handler.updateItem
-    layers:
-      # Please fill in as provided by the deployment wizard
-    environment:
-      # Please fill in as provided by the deployment wizard
+    layers: ${self:custom.layers}
+    environment: ${self:custom.environment}
     events:
       - http:
           method: put
           path: todolist/{id}
-          cors:
-            origin: '*' # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - x-dtc
-              - Content-Type
-            allowCredentials: true
+          cors: ${self:custom.cors}
 
   deleteTodo:
+    name: deleteTodoListItem
     handler: handler.deleteItem
-    layers:
-      # Please fill in as provided by the deployment wizard
-    environment:
-      # Please fill in as provided by the deployment wizard
+    layers: ${self:custom.layers}
+    environment: ${self:custom.environment}
     events:
       - http:
           method: delete
           path: todolist/{id}
-          cors:
-            origin: '*' # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - x-dtc
-              - Content-Type
-            allowCredentials: true
+          cors: ${self:custom.cors}
 
   getTodo:
+    name: getTodoListItem
     handler: handler.getItem
-    layers:
-      # Please fill in as provided by the deployment wizard
-    environment:
-      # Please fill in as provided by the deployment wizard
+    layers: ${self:custom.layers}
+    environment: ${self:custom.environment}
     events:
       - http:
           method: get
           path: todolist/{id}
-          cors:
-            origin: '*' # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - x-dtc
-              - Content-Type
-            allowCredentials: true
+          cors: ${self:custom.cors}
 
   getTodos:
+    name: getTodoListItems
     handler: handler.getItems
-    layers:
-      # Please fill in as provided by the deployment wizard
-    environment:
-      # Please fill in as provided by the deployment wizard
+    layers: ${self:custom.layers}
+    environment: ${self:custom.environment}
     events:
       - http:
           method: get
           path: todolist
-          cors:
-            origin: '*' # <-- Specify allowed origin
-            headers: # <-- Specify allowed headers
-              - x-dtc
-              - Content-Type
-            allowCredentials: true
+          cors: ${self:custom.cors}
+
+custom:
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 5
+    maxConcurrentRequests: 2
+
+  dynamodb:
+    stages:
+      - dev
+
+  # shared CORS settings for API Gateway
+  cors:
+    origin: '*' # <-- Specify allowed origin
+    headers: # <-- Specify allowed headers
+      - Content-Type
+      - x-dtc
+    allowCredentials: true
+
+  layers: []
+
+  environment: {}

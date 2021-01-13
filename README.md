@@ -24,6 +24,7 @@ Keep the URLs of the created Lambda functions - you will need them to set up the
 1. Open `todolist-frontend/src/api/index.js`
 2. Set `baseurl` which is the URL part all Lambda functions of your deployment have in common.
    (If the URL of an individual function is `https://a12345678b.execute-api.us-east-1.amazonaws.com/dev/getTodos`, `baseurl` would be `https://a12345678b.execute-api.us-east-1.amazonaws.com/dev`)
+3. Update JavaScript agent in `todolist-frontend/public/index.html`
 
 ## Running the frontend locally
 
