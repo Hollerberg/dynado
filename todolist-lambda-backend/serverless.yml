@@ -121,4 +121,5 @@ custom:
 
   layers: []
 
-  environment: {}
+  environment:
+    DUMMY_AS_ENVIRONMENT_MUST_NOT_BE_EMPTY: 1

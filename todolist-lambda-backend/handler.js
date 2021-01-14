@@ -21,19 +21,31 @@ function respond(fulfillmentText, statusCode) {
 }
 
 async function slowRequest(delay) {
+  // eslint-disable-next-line no-console
+  console.log(`delaying response for ${delay}ms as instructed`);
   return axios.get(
     `http://slowwly.robertomurray.co.uk/delay/${delay}/url/http://www.google.co.uk`
   );
 }
 
+function condThrowException(item) {
+  const reg = /!exception (.+)/;
+  const match = item.match(reg);
+  if (match != null) {
+    // eslint-disable-next-line no-console
+    console.log(`throwing exception '${match[1]}' as instructed`);
+    throw new Error(match[1]);
+  }
+}
+
 function isSlow(item) {
-  const reg = /{slow\((\d+)\)}/;
+  const reg = /!slow (\d+)/;
   const match = item.match(reg);
   return match ? match[1] : false;
 }
 
 function isError(item) {
-  const reg = /{error\((\d{3})\)}/;
+  const reg = /!error (\d{3})/;
   const match = item.match(reg);
   if (match && match[1] <= 399) {
     return false;
@@ -44,6 +56,8 @@ function isError(item) {
 module.exports.createItem = async (event) => {
   const incoming = JSON.parse(event.body);
   const { item, completed } = incoming;
+
+  condThrowException(item);
 
   try {
     const delay = isSlow(item);
@@ -66,6 +80,7 @@ module.exports.updateItem = async (event) => {
   const incoming = JSON.parse(event.body);
   const { id } = event.pathParameters;
   const { item, completed } = incoming;
+  condThrowException(item);
   try {
     const delay = isSlow(item);
     if (delay) {
@@ -102,8 +117,14 @@ module.exports.getItem = async (event) => {
   }
 };
 
-module.exports.getItems = async () => {
+module.exports.getItems = async (event) => {
   try {
+    if (
+      event.queryStringParameters != null &&
+      event.queryStringParameters.delay != null
+    ) {
+      await slowRequest(event.queryStringParameters.delay);
+    }
     const toDoItem = await getItems();
     return respond(toDoItem, 200);
   } catch (err) {
