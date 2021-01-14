@@ -1,4 +1,5 @@
 const axios = require('axios');
+const debug = require('debug')('dynado');
 
 // Based on https://medium.com/better-programming/store-fetch-from-dynamodb-with-aws-lambda-342d1785a5d0
 const {
@@ -9,9 +10,11 @@ const {
 } = require('./dynamodb-actions');
 
 function respond(fulfillmentText, statusCode) {
+  const body = JSON.stringify(fulfillmentText);
+  debug(`respond: ${statusCode} ${body}`);
   return {
     statusCode,
-    body: JSON.stringify(fulfillmentText),
+    body,
     headers: {
       'Access-Control-Allow-Credentials': true,
       'Access-Control-Allow-Origin': '*',
@@ -21,8 +24,7 @@ function respond(fulfillmentText, statusCode) {
 }
 
 async function slowRequest(delay) {
-  // eslint-disable-next-line no-console
-  console.log(`delaying response for ${delay}ms as instructed`);
+  debug(`delaying response for ${delay}ms as instructed`);
   return axios.get(
     `http://slowwly.robertomurray.co.uk/delay/${delay}/url/http://www.google.co.uk`
   );
@@ -32,8 +34,7 @@ function condThrowException(item) {
   const reg = /!exception (.+)/;
   const match = item.match(reg);
   if (match != null) {
-    // eslint-disable-next-line no-console
-    console.log(`throwing exception '${match[1]}' as instructed`);
+    debug(`throwing exception '${match[1]}' as instructed`);
     throw new Error(match[1]);
   }
 }
@@ -57,12 +58,15 @@ module.exports.createItem = async (event) => {
   const incoming = JSON.parse(event.body);
   const { item, completed } = incoming;
 
+  debug(`createItem: ${item}, ${completed}`);
+
   condThrowException(item);
 
   try {
     const delay = isSlow(item);
     if (delay) {
       await slowRequest(delay);
+      return respond(200, 'all good');
     }
 
     const errorCode = isError(item);
@@ -80,11 +84,15 @@ module.exports.updateItem = async (event) => {
   const incoming = JSON.parse(event.body);
   const { id } = event.pathParameters;
   const { item, completed } = incoming;
+
+  debug(`updateItem: ${id}, ${item}, ${completed}`);
+
   condThrowException(item);
   try {
     const delay = isSlow(item);
     if (delay) {
       await slowRequest(delay);
+      return respond(200, 'all good');
     }
     const errorCode = isError(item);
     if (errorCode) {
@@ -99,6 +107,9 @@ module.exports.updateItem = async (event) => {
 
 module.exports.deleteItem = async (event) => {
   const { id } = event.pathParameters;
+
+  debug(`deleteItem: ${id}`);
+
   try {
     await deleteItem(id);
     return respond({ deleted: true }, 204);
@@ -109,6 +120,9 @@ module.exports.deleteItem = async (event) => {
 
 module.exports.getItem = async (event) => {
   const { id } = event.pathParameters;
+
+  debug(`getItem: ${id}`);
+
   try {
     const toDoItem = await getItems(id);
     return respond(toDoItem, 200);
@@ -118,6 +132,8 @@ module.exports.getItem = async (event) => {
 };
 
 module.exports.getItems = async (event) => {
+  debug(`getItems`);
+
   try {
     if (
       event.queryStringParameters != null &&

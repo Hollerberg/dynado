@@ -5,6 +5,7 @@
   "main": "handler.js",
   "dependencies": {
     "axios": "^0.21.0",
+    "debug": "^4.3.1",
     "uuid": "^8.3.1"
   },
   "devDependencies": {
