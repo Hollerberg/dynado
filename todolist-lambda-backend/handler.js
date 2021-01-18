@@ -66,7 +66,7 @@ module.exports.createItem = async (event) => {
     const delay = isSlow(item);
     if (delay) {
       await slowRequest(delay);
-      return respond(200, 'all good');
+      return respond({ created: 'dummy-entry' }, 201);
     }
 
     const errorCode = isError(item);
