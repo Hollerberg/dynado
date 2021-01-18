@@ -39,6 +39,12 @@ function condThrowException(item) {
   }
 }
 
+function isDummyItem(item) {
+  const reg = /!dummy/;
+  const match = item.match(reg);
+  return match != null;
+}
+
 function isSlow(item) {
   const reg = /!slow (\d+)/;
   const match = item.match(reg);
@@ -66,6 +72,11 @@ module.exports.createItem = async (event) => {
     const delay = isSlow(item);
     if (delay) {
       await slowRequest(delay);
+      return respond({ created: 'dummy-entry' }, 201);
+    }
+
+    // for syntetic requests
+    if (isDummyItem(item)) {
       return respond({ created: 'dummy-entry' }, 201);
     }
 
