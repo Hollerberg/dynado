@@ -71,7 +71,7 @@ module.exports.createItem = async (event) => {
   try {
     const delay = isSlow(item);
     if (delay) {
-      await slowRequest(delay);
+      await Promise.all([slowRequest(delay), getItems()]);
       return respond({ created: 'dummy-entry' }, 201);
     }
 
@@ -102,7 +102,7 @@ module.exports.updateItem = async (event) => {
   try {
     const delay = isSlow(item);
     if (delay) {
-      await slowRequest(delay);
+      await Promise.all([slowRequest(delay), getItems()]);
       return respond(200, 'all good');
     }
     const errorCode = isError(item);
