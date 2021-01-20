@@ -1,5 +1,6 @@
 const axios = require('axios');
 const debug = require('debug')('dynado');
+const util = require('util');
 
 // Based on https://medium.com/better-programming/store-fetch-from-dynamodb-with-aws-lambda-342d1785a5d0
 const {
@@ -61,6 +62,12 @@ function isError(item) {
 }
 
 module.exports.createItem = async (event) => {
+  debug(`createItem: event.body=${event.body}`);
+  if (event.body == null) {
+    await getItems();
+    return respond({ created: 'nothing' }, 201);
+  }
+
   const incoming = JSON.parse(event.body);
   const { item, completed } = incoming;
 
@@ -71,12 +78,14 @@ module.exports.createItem = async (event) => {
   try {
     const delay = isSlow(item);
     if (delay) {
-      await Promise.all([slowRequest(delay), getItems()]);
+      await slowRequest(delay);
+      await getItems();
       return respond({ created: 'dummy-entry' }, 201);
     }
 
     // for syntetic requests
     if (isDummyItem(item)) {
+      await getItems();
       return respond({ created: 'dummy-entry' }, 201);
     }
 
@@ -87,11 +96,17 @@ module.exports.createItem = async (event) => {
     const insertResult = await createItem(item, completed);
     return respond({ created: insertResult }, 201);
   } catch (err) {
-    return respond(err, 400);
+    return respond(`${err}`, 400);
   }
 };
 
 module.exports.updateItem = async (event) => {
+  debug(`createItem: event.body=${event.body}`);
+  if (event.body == null) {
+    await getItems();
+    return respond({ created: 'nothing' }, 201);
+  }
+
   const incoming = JSON.parse(event.body);
   const { id } = event.pathParameters;
   const { item, completed } = incoming;
@@ -102,7 +117,8 @@ module.exports.updateItem = async (event) => {
   try {
     const delay = isSlow(item);
     if (delay) {
-      await Promise.all([slowRequest(delay), getItems()]);
+      await slowRequest(delay)
+      await getItems();
       return respond(200, 'all good');
     }
     const errorCode = isError(item);
@@ -112,20 +128,19 @@ module.exports.updateItem = async (event) => {
     const insertResult = await updateItem(id, item, completed);
     return respond({ updated: insertResult }, 201);
   } catch (err) {
-    return respond(err, 400);
+    return respond(`${err}`, 400);
   }
 };
 
 module.exports.deleteItem = async (event) => {
   const { id } = event.pathParameters;
-
   debug(`deleteItem: ${id}`);
 
   try {
     await deleteItem(id);
     return respond({ deleted: true }, 204);
   } catch (err) {
-    return respond(err, 404);
+    return respond(`${err}`, 404);
   }
 };
 
@@ -138,7 +153,7 @@ module.exports.getItem = async (event) => {
     const toDoItem = await getItems(id);
     return respond(toDoItem, 200);
   } catch (err) {
-    return respond(err, 404);
+    return respond(`${err}`, 404);
   }
 };
 
@@ -155,6 +170,6 @@ module.exports.getItems = async (event) => {
     const toDoItem = await getItems();
     return respond(toDoItem, 200);
   } catch (err) {
-    return respond(err, 404);
+    return respond(`${err}`, 404);
   }
 };
