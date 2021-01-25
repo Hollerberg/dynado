@@ -1,6 +1,5 @@
 const axios = require('axios');
 const debug = require('debug')('dynado');
-const util = require('util');
 
 // Based on https://medium.com/better-programming/store-fetch-from-dynamodb-with-aws-lambda-342d1785a5d0
 const {
@@ -117,7 +116,7 @@ module.exports.updateItem = async (event) => {
   try {
     const delay = isSlow(item);
     if (delay) {
-      await slowRequest(delay)
+      await slowRequest(delay);
       await getItems();
       return respond(200, 'all good');
     }
@@ -173,3 +172,16 @@ module.exports.getItems = async (event) => {
     return respond(`${err}`, 404);
   }
 };
+
+function coldStartDelay() {
+  // two seconds
+  const delay = BigInt(1000 * 1000 * 1000 * 2);
+  const tsStart = process.hrtime.bigint();
+
+  // eslint-disable-next-line prettier/prettier
+  while ((process.hrtime.bigint() - tsStart) < delay) {
+    //
+  }
+}
+
+coldStartDelay();
