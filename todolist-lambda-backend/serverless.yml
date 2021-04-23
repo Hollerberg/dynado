@@ -10,12 +10,27 @@ service: aws-lambda-todolist-service
 # Check out our docs for more details
 frameworkVersion: '2'
 
+#
+# required to enable serverless async variable resolution
+#
+variablesResolutionMode: '20210326'
+
+# Disable all deprecation messages
+disabledDeprecations:
+  - '*'
+
 provider:
   name: aws
   runtime: nodejs12.x
+  region: us-east-1
   timeout: 30
-  memorySize: 128
-  logRetentionInDays: 30
+  memorySize: 512
+  logRetentionInDays: 3
+
+  environment:
+    DEBUG: dynado
+    DT_LOGGING_DESTINATION: stderr
+    DT_LOGGING_NODEJS_FLAGS: Exporter=true,LambdaSensor=true,Propagator=true
 
   apiGateway:
     shouldStartNameWithService: true
@@ -39,8 +54,7 @@ provider:
             - 'table/to-do-list-item'
 
 plugins:
-  - serverless-offline
-  - serverless-api-gateway-throttling
+  - serverless-plugin-scripts
 
 resources:
   # DynamoDB
@@ -50,8 +64,9 @@ functions:
   createTodo:
     name: createTodoListItem
     handler: handler.createItem
-    layers: ${self:custom.layers}
-    environment: ${self:custom.environment}
+    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    environment: ${self:custom.OneAgentConfig}
+    reservedConcurrency: 5
     events:
       - http:
           method: post
@@ -61,8 +76,9 @@ functions:
   updateTodo:
     name: updateTodoListItem
     handler: handler.updateItem
-    layers: ${self:custom.layers}
-    environment: ${self:custom.environment}
+    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    environment: ${self:custom.OneAgentConfig}
+    reservedConcurrency: 5
     events:
       - http:
           method: put
@@ -72,8 +88,9 @@ functions:
   deleteTodo:
     name: deleteTodoListItem
     handler: handler.deleteItem
-    layers: ${self:custom.layers}
-    environment: ${self:custom.environment}
+    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    environment: ${self:custom.OneAgentConfig}
+    reservedConcurrency: 5
     events:
       - http:
           method: delete
@@ -83,8 +100,9 @@ functions:
   getTodo:
     name: getTodoListItem
     handler: handler.getItem
-    layers: ${self:custom.layers}
-    environment: ${self:custom.environment}
+    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    environment: ${self:custom.OneAgentConfig}
+    reservedConcurrency: 5
     events:
       - http:
           method: get
@@ -94,8 +112,8 @@ functions:
   getTodos:
     name: getTodoListItems
     handler: handler.getItems
-    layers: ${self:custom.layers}
-    environment: ${self:custom.environment}
+    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    environment: ${self:custom.OneAgentConfig}
     events:
       - http:
           method: get
@@ -103,10 +121,6 @@ functions:
           cors: ${self:custom.cors}
 
 custom:
-  apiGatewayThrottling:
-    maxRequestsPerSecond: 5
-    maxConcurrentRequests: 2
-
   dynamodb:
     stages:
       - dev
@@ -114,12 +128,17 @@ custom:
   # shared CORS settings for API Gateway
   cors:
     origin: '*' # <-- Specify allowed origin
+    allowCredentials: true
     headers: # <-- Specify allowed headers
       - Content-Type
       - x-dtc
-    allowCredentials: true
 
-  layers: []
+  OneAgentlayerARNs: ${file(./getOneAgentLayerARNs.js):get}
 
-  environment:
-    DUMMY_AS_ENVIRONMENT_MUST_NOT_BE_EMPTY: 1
+  OneAgentConfig:
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
+    DT_TENANT: bgm14430
+    DT_CLUSTER_ID: 2041375367
+    DT_CONNECTION_BASE_URL: https://bgm14430.dev.dynatracelabs.com
+    DT_CONNECTION_AUTH_TOKEN: xxxxxx.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
