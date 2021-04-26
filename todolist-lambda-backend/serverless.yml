@@ -71,7 +71,7 @@ functions:
       - http:
           method: post
           path: todolist
-          cors: ${self:custom.cors}
+          ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
   updateTodo:
     name: updateTodoListItem
@@ -83,7 +83,7 @@ functions:
       - http:
           method: put
           path: todolist/{id}
-          cors: ${self:custom.cors}
+          ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
   deleteTodo:
     name: deleteTodoListItem
@@ -95,7 +95,7 @@ functions:
       - http:
           method: delete
           path: todolist/{id}
-          cors: ${self:custom.cors}
+          ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
   getTodo:
     name: getTodoListItem
@@ -107,7 +107,7 @@ functions:
       - http:
           method: get
           path: todolist/{id}
-          cors: ${self:custom.cors}
+          ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
   getTodos:
     name: getTodoListItems
@@ -118,24 +118,33 @@ functions:
       - http:
           method: get
           path: todolist
-          cors: ${self:custom.cors}
+          ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
 custom:
   dynamodb:
     stages:
       - dev
 
+  #
   # API Gateway CORS settings
-  cors:
+  # for Real User Monitoring, add x-dtc header to allowed headers
+  #
+  ApiGwCorsSettings:
     origin: '*'
     allowCredentials: true
     headers:
       - Content-Type
       - x-dtc
 
-  OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_20210423-040722_nodejs:1
+  #
+  # OneAgent layer copied from Dynatrace Lambda deployment screen
+  #
+  OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_215_15_20210324-040722_nodejs:1
   #OneAgentLayer: ${file(./queryOneAgentLayerARNs.js):nodejs}
 
+  #
+  # settings copied from Dynatrace Lambda deployment screen
+  #
   OneAgentConfig:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
     DT_TENANT: bgm14430
