@@ -64,7 +64,7 @@ functions:
   createTodo:
     name: createTodoListItem
     handler: handler.createItem
-    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    layers: ${self:custom.OneAgentLayer}
     environment: ${self:custom.OneAgentConfig}
     reservedConcurrency: 5
     events:
@@ -76,7 +76,7 @@ functions:
   updateTodo:
     name: updateTodoListItem
     handler: handler.updateItem
-    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    layers: ${self:custom.OneAgentLayer}
     environment: ${self:custom.OneAgentConfig}
     reservedConcurrency: 5
     events:
@@ -88,7 +88,7 @@ functions:
   deleteTodo:
     name: deleteTodoListItem
     handler: handler.deleteItem
-    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    layers: ${self:custom.OneAgentLayer}
     environment: ${self:custom.OneAgentConfig}
     reservedConcurrency: 5
     events:
@@ -100,7 +100,7 @@ functions:
   getTodo:
     name: getTodoListItem
     handler: handler.getItem
-    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    layers: ${self:custom.OneAgentLayer}
     environment: ${self:custom.OneAgentConfig}
     reservedConcurrency: 5
     events:
@@ -112,7 +112,7 @@ functions:
   getTodos:
     name: getTodoListItems
     handler: handler.getItems
-    layers: ${self:custom.OneAgentlayerARNs.nodejs}
+    layers: ${self:custom.OneAgentLayer}
     environment: ${self:custom.OneAgentConfig}
     events:
       - http:
@@ -125,20 +125,20 @@ custom:
     stages:
       - dev
 
-  # shared CORS settings for API Gateway
+  # API Gateway CORS settings
   cors:
-    origin: '*' # <-- Specify allowed origin
+    origin: '*'
     allowCredentials: true
-    headers: # <-- Specify allowed headers
+    headers:
       - Content-Type
       - x-dtc
 
-  OneAgentlayerARNs: ${file(./getOneAgentLayerARNs.js):get}
+  OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_20210423-040722_nodejs:1
+  #OneAgentLayer: ${file(./queryOneAgentLayerARNs.js):nodejs}
 
   OneAgentConfig:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
     DT_TENANT: bgm14430
-    DT_CLUSTER_ID: 2041375367
+    DT_CLUSTER_ID: 2041330775
     DT_CONNECTION_BASE_URL: https://bgm14430.dev.dynatracelabs.com
     DT_CONNECTION_AUTH_TOKEN: xxxxxx.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
