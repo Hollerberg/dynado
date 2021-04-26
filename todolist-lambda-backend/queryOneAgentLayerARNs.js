@@ -140,7 +140,7 @@ module.exports.get = async (sls) => {
  */
 ['nodejs', 'python', 'java'].forEach((runtime) => {
   module.exports[runtime] = async (sls) => {
-    const layerARNs = await queryOneAgentLayerARNs(sls);
+    const layerARNs = await module.exports.get(sls);
     return layerARNs[runtime];
   };
 });
