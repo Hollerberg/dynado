@@ -1,4 +1,5 @@
 const https = require('https');
+const { URL } = require('url');
 
 /* ----------------------------------------------------------------------------
 
@@ -107,13 +108,13 @@ module.exports.get = async (sls) => {
   return new Promise((resolve, reject) => {
     const opts = {
       headers: {
-        accept: '*/*',
+        accept: 'application/json',
         Authorization: `Api-Token ${paasToken}`,
       },
     };
 
     https.get(
-      `${connetionBaseUrl}/api/v1/deployment/agent/lambda/latest`,
+      new URL(`/api/v1/deployment/lambda/agent/latest`, connetionBaseUrl),
       opts,
       (res) => {
         if (res.statusCode !== 200) {
@@ -130,7 +131,7 @@ module.exports.get = async (sls) => {
         res.on('end', () => {
           try {
             // version is a Record with runtime name as key and according partial layername
-            const { versions } = JSON.parse(data);
+            const versions = JSON.parse(data);
 
             // transform the partial layer names to full ARNs
             const transformed = {};
