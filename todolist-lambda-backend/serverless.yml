@@ -17,7 +17,7 @@ variablesResolutionMode: '20210326'
 
 # Disable all deprecation messages
 disabledDeprecations:
-  - '[.]+'
+  - '.*'
 
 provider:
   name: aws
@@ -144,14 +144,13 @@ custom:
   #
   # OneAgent layer copied from Dynatrace Lambda deployment screen
   #
-  OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_215_1_20210326-040705_nodejs:1
+  OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_213_2_20210419-151053_nodejs:1
 
   #
   # settings copied from Dynatrace Lambda deployment screen
   #
   OneAgentConfig:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
-    DT_TENANT: bgm14430
-    DT_CLUSTER_ID: 2041330775
-    DT_CONNECTION_BASE_URL: https://bgm14430.dev.dynatracelabs.com
-    DT_CONNECTION_AUTH_TOKEN: xxxxxx.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    DT_TENANT: jzc69700
+    DT_CLUSTER_ID: 1228725359
+    DT_CONNECTION_BASE_URL: https://jzc69700.sprint.dynatracelabs.com

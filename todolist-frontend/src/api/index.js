@@ -3,7 +3,7 @@ import normalizeUrl from 'normalize-url';
 
 // Please set the baseurl to your lambda function here:
 // e.g.: https://a12345678b.execute-api.us-east-1.amazonaws.com/dev
-const baseurl = 'https://x63ysxfgq5.execute-api.us-east-1.amazonaws.com/dev';
+const baseurl = 'https://fdankfphp2.execute-api.us-east-1.amazonaws.com/dev';
 
 if (!baseurl) {
   throw new Error('Please define a baseurl for your Lambda functions!');
