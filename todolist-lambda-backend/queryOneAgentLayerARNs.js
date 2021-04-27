@@ -1,66 +1,15 @@
 const https = require('https');
 const { URL } = require('url');
 
-/* ----------------------------------------------------------------------------
-
-# An excerpt of a sample serverless.yml using queryOneAgentLayerARNs.js
-
-#
-# required to enable serverless async variable resolution
-#
-variablesResolutionMode: '20210326'
-
-functions:
-  helloWorld:
-    handler: index.hello
-    # reference custom.OneAgentLayerARNs.nodejs to include OneAgent layer
-    layers: ${self:custom.OneAgentLayerARNs.nodejs}
-    # reference custom.OneAgentConfig with OneAgent configuration from Lambda deployment screen
-    environment: ${self:custom.OneAgentConfig}
-
-custom:
-  #
-  # specify PAAS token. Alternatively, specify environment variable DT_PAAS_TOKEN
-  # PAAS token is required to access Dynatrace deployment APIs
-  #
-  queryOneAgentLayerARNs:
-    paasToken: <PAAS token>
-
-  #
-  # OneAgentLayerARNs will be resolved to the latest version of OneAgent layer ARNs e.g.
-  #
-  # OneAgentLayerARNs:
-  #   python: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_python:1
-  #   java: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_10_java:1
-  #   nodejs: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_nodejs:1
-  OneAgentLayerARNs: ${file(./queryOneAgentLayerARNs.js):get}
-
-  #
-  # alternatively, a specific runtime layer ARN can be resolved directly
-  #
-  # resolves to:
-  # OneAgentNodeLayerARN: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_nodejs:1
-  #
-  OneAgentNodeLayerARN: ${file(./queryOneAgentLayerARNs.js):nodejs}
-
-  # settings copied from Dynatrace Lambda deployment screen (serverless deployment mode)
-  OneAgentConfig:
-    AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
-    DT_TENANT: xyzsfsdf
-    DT_CLUSTER_ID: 2041375367
-    DT_CONNECTION_BASE_URL: https://xyzsfsdf.live.dynatrace.com
-    DT_CONNECTION_AUTH_TOKEN: xxxxxx.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-  -------------------------------------------------------------------------- */
-
 /**
  * determine latest OneAgent extension layer ARNs
  * preconditions:
+ * - Dynatrace version 1.218 or later
  * - the new serverless framework asychnronous variable resolver must be enabled. in order to do so,
  *   add `variablesResolutionMode: '20210326'` to the toplevel of your serverless.yml file.
  * - DT_PAAS_TOKEN environment varible contains PaaS token required to query deployment API (alternatively,
  *   specify custom.queryOneAgentLayerARNs.paasToken in serverless configuration)
- * - OneAgent configuration - expected to be copied custom.OneAgentConfig
+ * - OneAgent configuration - expected to be copied custom.OneAgentConfig (see sample serverless.yml at end of file)
  *
  * @returns JSON document with layer name for every supported runtime
  */
@@ -164,3 +113,55 @@ module.exports.get = async (sls) => {
     return layerARNs[runtime];
   };
 });
+
+/* ----------------------------------------------------------------------------
+
+# An excerpt of a sample serverless.yml using queryOneAgentLayerARNs.js
+
+#
+# required to enable serverless async variable resolution
+#
+variablesResolutionMode: '20210326'
+
+functions:
+  helloWorld:
+    handler: index.hello
+    # reference custom.OneAgentLayerARNs.nodejs to include OneAgent layer
+    layers: ${self:custom.OneAgentLayerARNs.nodejs}
+    # reference custom.OneAgentConfig with OneAgent configuration from Lambda deployment screen
+    environment: ${self:custom.OneAgentConfig}
+
+custom:
+  #
+  # specify PAAS token. Alternatively, specify environment variable DT_PAAS_TOKEN
+  # PAAS token is required to access Dynatrace deployment APIs
+  #
+  queryOneAgentLayerARNs:
+    paasToken: <PAAS token>
+
+  #
+  # OneAgentLayerARNs will be resolved to the latest version of OneAgent layer ARNs e.g.
+  #
+  # OneAgentLayerARNs:
+  #   python: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_python:1
+  #   java: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_10_java:1
+  #   nodejs: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_nodejs:1
+  OneAgentLayerARNs: ${file(./queryOneAgentLayerARNs.js):get}
+
+  #
+  # alternatively, a specific runtime layer ARN can be resolved directly
+  #
+  # resolves to:
+  # OneAgentNodeLayerARN: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_217_1_nodejs:1
+  #
+  OneAgentNodeLayerARN: ${file(./queryOneAgentLayerARNs.js):nodejs}
+
+  # settings copied from Dynatrace Lambda deployment screen (serverless deployment mode)
+  OneAgentConfig:
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
+    DT_TENANT: xyzsfsdf
+    DT_CLUSTER_ID: 2041375367
+    DT_CONNECTION_BASE_URL: https://xyzsfsdf.live.dynatrace.com
+    DT_CONNECTION_AUTH_TOKEN: xxxxxx.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+  -------------------------------------------------------------------------- */
