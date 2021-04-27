@@ -61,6 +61,7 @@ resources:
   - ${file(resources/dynamodb-table.yml)}
 
 functions:
+  # ---------------------------------------------------------------------------
   createTodo:
     name: createTodoListItem
     handler: handler.createItem
@@ -73,6 +74,7 @@ functions:
           path: todolist
           ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
+  # ---------------------------------------------------------------------------
   updateTodo:
     name: updateTodoListItem
     handler: handler.updateItem
@@ -85,6 +87,7 @@ functions:
           path: todolist/{id}
           ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
+  # ---------------------------------------------------------------------------
   deleteTodo:
     name: deleteTodoListItem
     handler: handler.deleteItem
@@ -97,6 +100,7 @@ functions:
           path: todolist/{id}
           ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
+  # ---------------------------------------------------------------------------
   getTodo:
     name: getTodoListItem
     handler: handler.getItem
@@ -109,6 +113,7 @@ functions:
           path: todolist/{id}
           ApiGwCorsSettings: ${self:custom.ApiGwCorsSettings}
 
+  # ---------------------------------------------------------------------------
   getTodos:
     name: getTodoListItems
     handler: handler.getItems
@@ -139,15 +144,14 @@ custom:
   #
   # OneAgent layer copied from Dynatrace Lambda deployment screen
   #
-  #OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_215_15_20210324-040722_nodejs:1
-  OneAgentLayer: ${file(./queryOneAgentLayerARNs.js):nodejs}
+  OneAgentLayer: arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_215_1_20210326-040705_nodejs:1
 
   #
   # settings copied from Dynatrace Lambda deployment screen
   #
   OneAgentConfig:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/dynatrace
-    DT_TENANT: elo29571
+    DT_TENANT: bgm14430
     DT_CLUSTER_ID: 2041330775
-    DT_CONNECTION_BASE_URL: https://elo29571.dev.dynatracelabs.com/
+    DT_CONNECTION_BASE_URL: https://bgm14430.dev.dynatracelabs.com
     DT_CONNECTION_AUTH_TOKEN: xxxxxx.xxxxxxxx.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
